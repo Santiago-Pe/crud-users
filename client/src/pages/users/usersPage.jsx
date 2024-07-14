@@ -1,7 +1,8 @@
 import { Button, Select, Space, Table, Tag } from "antd";
 import { Input } from "antd";
-import { UsersForm } from "../../components";
+
 import { useState } from "react";
+import { UserModalForm } from "../../components";
 
 const { Search } = Input;
 const dataSource = [
@@ -146,7 +147,10 @@ const UsersPage = () => {
           />
         </div>
         <div>
-          <UsersForm user={currentUser} reset={() => setCurrentUser(null)} />
+          <UserModalForm
+            user={currentUser}
+            reset={() => setCurrentUser(null)}
+          />
         </div>
       </div>
 
