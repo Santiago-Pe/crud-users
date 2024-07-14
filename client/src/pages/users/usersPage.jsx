@@ -1,110 +1,65 @@
-import { Button, Select, Space, Table, Tag } from "antd";
-import { Input } from "antd";
+import { Button, Select, Space, Table, Tag, Input } from "antd";
+import { useEffect } from "react";
 
-import { useState } from "react";
-import { UserModalForm } from "../../components";
+import {
+  fetchUsers,
+  setCurrentUser,
+} from "../../reudx/actions/users/userActions";
+import { UserModalForm, Loader, Show } from "../../components";
+import { useDispatch, useSelector } from "react-redux";
+import PageFaildFetch from "../errors/pageFaildFetch";
 
 const { Search } = Input;
-const dataSource = [
-  {
-    key: "1",
-    name: "Mike",
-    lastname: "Bubble",
-    status: false,
-    user: "mike_bubble",
-  },
-  {
-    key: "2",
-    name: "John",
-    lastname: "Valverde",
-    status: false,
-    user: "john_valverde",
-  },
-  {
-    key: "3",
-    name: "Jane",
-    lastname: "Smith",
-    status: true,
-    user: "jane_smith",
-  },
-  { key: "4", name: "Doe", lastname: "Doe", status: true, user: "doe_doe" },
-  {
-    key: "5",
-    name: "Anna",
-    lastname: "Taylor",
-    status: false,
-    user: "anna_taylor",
-  },
-  {
-    key: "6",
-    name: "Tom",
-    lastname: "Johnson",
-    status: true,
-    user: "tom_johnson",
-  },
-  { key: "7", name: "Lucy", lastname: "Lee", status: false, user: "lucy_lee" },
-  {
-    key: "8",
-    name: "Mark",
-    lastname: "Brown",
-    status: true,
-    user: "mark_brown",
-  },
-  {
-    key: "9",
-    name: "Emma",
-    lastname: "White",
-    status: false,
-    user: "emma_white",
-  },
-  {
-    key: "10",
-    name: "James",
-    lastname: "Garcia",
-    status: true,
-    user: "james_garcia",
-  },
-];
 
 const UsersPage = () => {
-  const [currentUser, setCurrentUser] = useState(null);
+  const dispatch = useDispatch();
+  const { users, loading, error } = useSelector((state) => state.users);
+
+  useEffect(() => {
+    dispatch(fetchUsers());
+  }, [dispatch]);
+
   const onSearch = (value, _e, info) => console.log(info?.source, value);
+
   const columns = [
     {
       title: "Usuario",
-      dataIndex: "user",
-      key: "user",
+      dataIndex: "username",
+      key: "username",
       width: "33.33%",
+      render: (username) => <span>{username}</span>,
     },
     {
       title: "Nombre",
       dataIndex: "name",
       key: "name",
       width: "33.33%",
+      render: (name) => <span>{name}</span>,
     },
     {
       title: "Apellido",
       dataIndex: "lastname",
       key: "lastname",
       width: "33.33%",
+      render: (lastname) => <span>{lastname}</span>,
     },
     {
-      width: 100,
       title: "Estado",
       dataIndex: "status",
       key: "status",
+      width: 100,
       render: (status) => (
-        <Tag color={status ? "green" : "red"}>
-          {status ? "Activo" : "Inactivo"}
+        <Tag color={status === "active" ? "green" : "red"}>
+          {status === "active" ? "Activo" : "Inactivo"}
         </Tag>
       ),
     },
     {
-      width: 200,
       title: "Acciones",
-      dataIndex: "accions",
-      key: "accions",
-      render: (text, record) => (
+      dataIndex: "actions",
+      key: "actions",
+      width: 200,
+      render: (_, record) => (
         <Space size="middle">
           <Button
             type="link"
@@ -115,7 +70,7 @@ const UsersPage = () => {
           </Button>
           <Button
             type="link"
-            onClick={() => setCurrentUser(record)}
+            onClick={() => dispatch(setCurrentUser(record))}
             size="small"
           >
             Editar
@@ -125,6 +80,7 @@ const UsersPage = () => {
     },
   ];
 
+  console.log("render");
   return (
     <>
       <div className="pageHeader">
@@ -147,14 +103,20 @@ const UsersPage = () => {
           />
         </div>
         <div>
-          <UserModalForm
-            user={currentUser}
-            reset={() => setCurrentUser(null)}
-          />
+          <UserModalForm useButton />
         </div>
       </div>
-
-      <Table dataSource={dataSource} columns={columns} rowHoverable={false} />
+      <Show>
+        <Show.When isTrue={loading}>
+          <Loader />
+        </Show.When>
+        <Show.When isTrue={error}>
+          <PageFaildFetch />
+        </Show.When>
+        <Show.Else>
+          <Table dataSource={users} columns={columns} rowKey="id" />
+        </Show.Else>
+      </Show>
     </>
   );
 };

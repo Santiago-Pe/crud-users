@@ -1,27 +1,33 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button, Modal } from "antd";
 import { UsersForm } from "../../forms";
+import { useDispatch, useSelector } from "react-redux";
+import { setCurrentUser } from "../../../reudx/actions/users/userActions";
 // eslint-disable-next-line react/prop-types
-const UserModalForm = ({ user = null, useButton = true, reset = null }) => {
+const UserModalForm = ({ useButton = true }) => {
+  const currentUser = useSelector((state) => state.users.currentUser);
+  const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      setOpen(true);
-    }
-  }, [user]);
-
   const handleModal = () => {
-    setOpen((prevState) => !prevState);
-    reset?.();
+    setOpen((prevState) => {
+      if (!prevState && currentUser) {
+        return false;
+      }
+      return !prevState;
+    });
+
+    if (currentUser) {
+      dispatch(setCurrentUser(null));
+    }
   };
+
   const handleOk = () => {
     setConfirmLoading(true);
     setTimeout(() => {
       setOpen(false);
       setConfirmLoading(false);
-      reset?.();
     }, 2000);
   };
 
@@ -34,7 +40,7 @@ const UserModalForm = ({ user = null, useButton = true, reset = null }) => {
       )}
       <Modal
         title="Title"
-        open={open}
+        open={open || currentUser}
         onOk={handleOk}
         confirmLoading={confirmLoading}
         onCancel={handleModal}

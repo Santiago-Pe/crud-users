@@ -3,26 +3,37 @@ import {
   FETCH_USERS_SUCCESS,
   FETCH_USERS_FAILURE,
   SET_CURRENT_USER,
-  CREATE_USER_REQUEST,
-  CREATE_USER_SUCCESS,
-  CREATE_USER_FAILURE,
-  UPDATE_USER_REQUEST,
-  UPDATE_USER_SUCCESS,
-  UPDATE_USER_FAILURE,
-  DELETE_USER_REQUEST,
-  DELETE_USER_SUCCESS,
-  DELETE_USER_FAILURE,
 } from "./userActionTypes";
-import api from "../../api"; // Asegúrate de tener configurado el api.js para realizar las peticiones
+import apiClient from "../../../api/apiClient";
 
-// Fetch Users
+// Acción para iniciar la solicitud de usuarios
+const fetchUsersRequest = () => ({
+  type: FETCH_USERS_REQUEST,
+});
+// Acción para manejar el éxito de la solicitud de usuarios
+const fetchUsersSuccess = (data) => ({
+  type: FETCH_USERS_SUCCESS,
+  payload: data,
+});
+// Acción para manejar el fallo de la solicitud de usuarios
+const fetchUsersFailure = (error) => ({
+  type: FETCH_USERS_FAILURE,
+  payload: error.message,
+});
+
+// Acción asincrónica para obtener usuarios
 export const fetchUsers = () => async (dispatch) => {
-  dispatch({ type: FETCH_USERS_REQUEST });
+  dispatch(fetchUsersRequest());
   try {
-    const response = await api.get("/users");
-    dispatch({ type: FETCH_USERS_SUCCESS, payload: response.data });
+    // Simulamos un tiempo de espera de 2 segundos
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    const response = await apiClient.get("/users");
+    dispatch(fetchUsersSuccess(response.data));
   } catch (error) {
-    dispatch({ type: FETCH_USERS_FAILURE, payload: error.message });
+    dispatch(fetchUsersFailure(error));
+  } finally {
+    dispatch({ type: "SET_LOADING_FALSE" });
   }
 };
 
@@ -31,36 +42,3 @@ export const setCurrentUser = (user) => ({
   type: SET_CURRENT_USER,
   payload: user,
 });
-
-// Create User
-export const createUser = (user) => async (dispatch) => {
-  dispatch({ type: CREATE_USER_REQUEST });
-  try {
-    const response = await api.post("/users", user);
-    dispatch({ type: CREATE_USER_SUCCESS, payload: response.data });
-  } catch (error) {
-    dispatch({ type: CREATE_USER_FAILURE, payload: error.message });
-  }
-};
-
-// Update User
-export const updateUser = (user) => async (dispatch) => {
-  dispatch({ type: UPDATE_USER_REQUEST });
-  try {
-    const response = await api.put(`/users/${user.id}`, user);
-    dispatch({ type: UPDATE_USER_SUCCESS, payload: response.data });
-  } catch (error) {
-    dispatch({ type: UPDATE_USER_FAILURE, payload: error.message });
-  }
-};
-
-// Delete User
-export const deleteUser = (id) => async (dispatch) => {
-  dispatch({ type: DELETE_USER_REQUEST });
-  try {
-    await api.delete(`/users/${id}`);
-    dispatch({ type: DELETE_USER_SUCCESS, payload: id });
-  } catch (error) {
-    dispatch({ type: DELETE_USER_FAILURE, payload: error.message });
-  }
-};
