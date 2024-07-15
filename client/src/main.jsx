@@ -7,27 +7,23 @@ import { ConfigProvider } from "antd";
 import { Provider } from "react-redux";
 import store from "./reudx/store/sotre.js";
 import ApiProvider from "./context/apiProvaider.jsx";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-const queryClient = new QueryClient();
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <ApiProvider>
-        <Provider store={store}>
-          <ConfigProvider
-            theme={{
-              token: {
-                borderRadius: 8,
-              },
-            }}
-          >
-            <BrowserRouter>
-              <App />
-            </BrowserRouter>
-          </ConfigProvider>
-        </Provider>
-      </ApiProvider>
-    </QueryClientProvider>
+    <ApiProvider>
+      <Provider store={store}>
+        <ConfigProvider
+          theme={{
+            token: {
+              borderRadius: 8,
+            },
+          }}
+        >
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </ConfigProvider>
+      </Provider>
+    </ApiProvider>
   </React.StrictMode>
 );

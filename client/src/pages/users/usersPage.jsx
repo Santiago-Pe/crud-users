@@ -9,6 +9,7 @@ import {
   setCurrentUser,
 } from "../../reudx/actions/users/userActions";
 import { useDebounce } from "../../hooks";
+import { CloseOutlined } from "@ant-design/icons";
 
 const { Search } = Input;
 
@@ -16,18 +17,27 @@ const UsersPage = () => {
   const dispatch = useDispatch();
   const [filters, setFilters] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
+  const [pagination, setPagination] = useState({ _page: 1, _limit: 10 });
   const debouncedSearchTerm = useDebounce(searchTerm, 1000);
 
-  const { users, loading, error } = useSelector((state) => state.users);
+  const { users, loading, error, total } = useSelector((state) => state.users);
 
   useEffect(() => {
-    dispatch(fetchUsers(filters));
-  }, [dispatch, filters]);
+    const fetchData = async () => {
+      await dispatch(fetchUsers({ ...filters, ...pagination }));
+    };
+
+    fetchData();
+  }, [dispatch, filters, pagination]);
 
   useEffect(() => {
     setFilters((prevFilters) => ({
       ...prevFilters,
       q: debouncedSearchTerm,
+    }));
+    setPagination((prevPagination) => ({
+      ...prevPagination,
+      _page: 1, // Reset current page when filters change
     }));
   }, [debouncedSearchTerm]);
 
@@ -36,9 +46,25 @@ const UsersPage = () => {
   };
 
   const handleFilterChange = (value, key) => {
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      [key]: value,
+    setFilters((prevFilters) => {
+      const newFilters = { ...prevFilters };
+      if (value === undefined) {
+        delete newFilters[key];
+      } else {
+        newFilters[key] = value;
+      }
+      return newFilters;
+    });
+    setPagination((prevPagination) => ({
+      ...prevPagination,
+      _page: 1, // Reset current page when filters change
+    }));
+  };
+  const handleTableChange = (pagination) => {
+    setPagination((prevPagination) => ({
+      ...prevPagination,
+      _page: pagination.current,
+      _limit: pagination.pageSize,
     }));
   };
 
@@ -109,7 +135,7 @@ const UsersPage = () => {
             size="large"
             placeholder="input search text"
             onSearch={onSearch}
-            onChange={(e) => setSearchTerm(e.target.value)} // Maneja el cambio de input
+            onChange={(e) => setSearchTerm(e.target.value)}
             style={{
               width: 300,
             }}
@@ -140,7 +166,17 @@ const UsersPage = () => {
           <PageFaildFetch />
         </Show.When>
         <Show.Else>
-          <Table dataSource={users} columns={columns} rowKey="id" />
+          <Table
+            dataSource={users}
+            columns={columns}
+            rowKey="id"
+            pagination={{
+              current: pagination._page,
+              pageSize: pagination._limit,
+              total: total,
+            }}
+            onChange={handleTableChange}
+          />
         </Show.Else>
       </Show>
     </>
