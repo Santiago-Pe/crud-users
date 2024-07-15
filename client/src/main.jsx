@@ -17,6 +17,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
             token: {
               borderRadius: 8,
             },
+            components: {
+              Modal: {
+                wireframe: true, // here
+              },
+            },
           }}
         >
           <BrowserRouter>
