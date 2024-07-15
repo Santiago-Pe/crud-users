@@ -1,1 +1,1 @@
-export { default as useFetchUsers } from "./users/useFetchUsers";
+export { default as useDebounce } from "./filters/useDebounce";

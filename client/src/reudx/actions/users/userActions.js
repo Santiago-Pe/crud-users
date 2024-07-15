@@ -22,20 +22,22 @@ const fetchUsersFailure = (error) => ({
 });
 
 // Acción asincrónica para obtener usuarios
-export const fetchUsers = () => async (dispatch) => {
-  dispatch(fetchUsersRequest());
-  try {
-    // Simulamos un tiempo de espera de 2 segundos
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    const response = await apiClient.get("/users");
-    dispatch(fetchUsersSuccess(response.data));
-  } catch (error) {
-    dispatch(fetchUsersFailure(error));
-  } finally {
-    dispatch({ type: "SET_LOADING_FALSE" });
-  }
-};
+export const fetchUsers =
+  (filters = {}) =>
+  async (dispatch) => {
+    dispatch(fetchUsersRequest());
+    try {
+      // Simulamos un tiempo de espera de 2 segundos
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const queryParams = new URLSearchParams(filters).toString();
+      const response = await apiClient.get(`/users?${queryParams}`);
+      dispatch(fetchUsersSuccess(response.data));
+    } catch (error) {
+      dispatch(fetchUsersFailure(error));
+    } finally {
+      dispatch({ type: "SET_LOADING_FALSE" });
+    }
+  };
 
 // Set Current User
 export const setCurrentUser = (user) => ({

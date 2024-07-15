@@ -1,25 +1,46 @@
 import { Button, Select, Space, Table, Tag, Input } from "antd";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
+import { UserModalForm, Loader, Show } from "../../components";
+import PageFaildFetch from "../errors/pageFaildFetch";
 import {
   fetchUsers,
   setCurrentUser,
 } from "../../reudx/actions/users/userActions";
-import { UserModalForm, Loader, Show } from "../../components";
-import { useDispatch, useSelector } from "react-redux";
-import PageFaildFetch from "../errors/pageFaildFetch";
+import { useDebounce } from "../../hooks";
 
 const { Search } = Input;
 
 const UsersPage = () => {
   const dispatch = useDispatch();
+  const [filters, setFilters] = useState({});
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 1000);
+
   const { users, loading, error } = useSelector((state) => state.users);
 
   useEffect(() => {
-    dispatch(fetchUsers());
-  }, [dispatch]);
+    dispatch(fetchUsers(filters));
+  }, [dispatch, filters]);
 
-  const onSearch = (value, _e, info) => console.log(info?.source, value);
+  useEffect(() => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      q: debouncedSearchTerm,
+    }));
+  }, [debouncedSearchTerm]);
+
+  const onSearch = (value) => {
+    setSearchTerm(value);
+  };
+
+  const handleFilterChange = (value, key) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [key]: value,
+    }));
+  };
 
   const columns = [
     {
@@ -80,7 +101,6 @@ const UsersPage = () => {
     },
   ];
 
-  console.log("render");
   return (
     <>
       <div className="pageHeader">
@@ -89,12 +109,18 @@ const UsersPage = () => {
             size="large"
             placeholder="input search text"
             onSearch={onSearch}
+            onChange={(e) => setSearchTerm(e.target.value)} // Maneja el cambio de input
             style={{
               width: 300,
             }}
           />
           <Select
-            options={[{ value: "sample", label: <span>sample</span> }]}
+            allowClear={{ clearIcon: <CloseOutlined /> }}
+            onChange={(value) => handleFilterChange(value, "status")}
+            options={[
+              { value: "active", label: "Activo" },
+              { value: "inactive", label: "Inactivo" },
+            ]}
             placeholder="Filtrar por estado"
             size="large"
             style={{
