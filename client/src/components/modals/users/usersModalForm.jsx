@@ -1,11 +1,14 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button, Modal, Form, Input, Row, Col, Select, message } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import { setCurrentUser } from "../../../reudx/actions/users/userActions";
 
-const UserModalForm = ({ useButton = true }) => {
+import ApiContext from "../../../context/apiContext";
+import { createUser, updateUser } from "../../../services/users/usersServices";
+
+const UserModalForm = ({ useButton = true, callback }) => {
   const currentUser = useSelector((state) => state.users.currentUser);
   const dispatch = useDispatch();
+  const { client: apiClient } = useContext(ApiContext);
   const [visible, setVisible] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [form] = Form.useForm();
@@ -22,17 +25,28 @@ const UserModalForm = ({ useButton = true }) => {
   const handleOk = () => {
     form
       .validateFields()
-      .then((values) => {
+      .then(async (values) => {
         console.log("Body enviado:", values); // Mostrar el body que se envía al servidor
         setConfirmLoading(true);
-        setTimeout(() => {
+
+        try {
+          if (currentUser) {
+            await updateUser(apiClient, currentUser.id, values);
+          } else {
+            await createUser(apiClient, values);
+          }
           handleModal();
-          setConfirmLoading(false);
           message.success(
             currentUser ? "Usuario actualizado" : "Usuario creado"
           );
           form.resetFields();
-        }, 2000);
+          callback?.();
+        } catch (error) {
+          console.error("Error al procesar la operación:", error);
+          message.error("Hubo un error al procesar la operación");
+        } finally {
+          setConfirmLoading(false);
+        }
       })
       .catch((errorInfo) => {
         console.log("Error al validar el formulario:", errorInfo);
@@ -55,7 +69,7 @@ const UserModalForm = ({ useButton = true }) => {
       )}
       <Modal
         title={currentUser ? "Editar usuario" : "Crear usuario"}
-        visible={visible}
+        open={visible}
         onOk={handleOk}
         onCancel={handleModal}
         confirmLoading={confirmLoading}
@@ -144,7 +158,7 @@ const UserModalForm = ({ useButton = true }) => {
                 name="age"
                 rules={[
                   {
-                    type: "number",
+                    type: "string",
                     message: "Por favor ingrese una edad válida",
                   },
                 ]}

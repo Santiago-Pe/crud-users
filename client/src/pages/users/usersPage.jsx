@@ -1,20 +1,27 @@
+// UsersPage.js
+import { useEffect, useState, useContext } from "react";
 import { Button, Select, Space, Table, Tag, Input } from "antd";
-import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-
+import ApiContext from "../../context/apiContext";
 import { UserModalForm, Loader, Show } from "../../components";
 import PageFaildFetch from "../errors/pageFaildFetch";
-import {
-  fetchUsers,
-  setCurrentUser,
-} from "../../reudx/actions/users/userActions";
+
 import { useDebounce } from "../../hooks";
 import { CloseOutlined } from "@ant-design/icons";
+import {
+  setCurrentUser,
+  setError,
+  setLoading,
+  setTotalRecords,
+  setUsers,
+} from "../../reudx/actions/users/userActions";
+import { fetchUsers } from "../../services/users/usersServices";
 
 const { Search } = Input;
 
 const UsersPage = () => {
   const dispatch = useDispatch();
+  const { client: apiClient } = useContext(ApiContext);
   const [filters, setFilters] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
   const [pagination, setPagination] = useState({ _page: 1, _limit: 10 });
@@ -22,25 +29,24 @@ const UsersPage = () => {
 
   const { users, loading, error, total } = useSelector((state) => state.users);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      await dispatch(fetchUsers({ ...filters, ...pagination }));
-    };
-
-    fetchData();
-  }, [dispatch, filters, pagination]);
-
-  useEffect(() => {
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      q: debouncedSearchTerm,
-    }));
-    setPagination((prevPagination) => ({
-      ...prevPagination,
-      _page: 1, // Reset current page when filters change
-    }));
-  }, [debouncedSearchTerm]);
-
+  // Fetch
+  const fetchData = async () => {
+    try {
+      dispatch(setLoading(true));
+      const response = await fetchUsers(apiClient, {
+        ...filters,
+        ...pagination,
+      });
+      console.log(response.data);
+      dispatch(setUsers(response.data));
+      dispatch(setTotalRecords(response.totalUsers));
+    } catch (error) {
+      dispatch(setError(error.message));
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+  // Functions
   const onSearch = (value) => {
     setSearchTerm(value);
   };
@@ -60,6 +66,7 @@ const UsersPage = () => {
       _page: 1, // Reset current page when filters change
     }));
   };
+
   const handleTableChange = (pagination) => {
     setPagination((prevPagination) => ({
       ...prevPagination,
@@ -127,6 +134,21 @@ const UsersPage = () => {
     },
   ];
 
+  useEffect(() => {
+    fetchData();
+  }, [filters, pagination]);
+
+  useEffect(() => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      q: debouncedSearchTerm,
+    }));
+    setPagination((prevPagination) => ({
+      ...prevPagination,
+      _page: 1, // Reset current page when filters change
+    }));
+  }, [debouncedSearchTerm]);
+
   return (
     <>
       <div className="pageHeader">
@@ -155,7 +177,7 @@ const UsersPage = () => {
           />
         </div>
         <div>
-          <UserModalForm useButton />
+          <UserModalForm useButton callback={fetchData} />
         </div>
       </div>
       <Show>
