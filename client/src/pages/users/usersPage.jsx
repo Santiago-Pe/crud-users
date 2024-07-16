@@ -24,6 +24,7 @@ const UsersPage = () => {
   const { client: apiClient } = useContext(ApiContext);
   const [filters, setFilters] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [pagination, setPagination] = useState({ _page: 1, _limit: 10 });
   const debouncedSearchTerm = useDebounce(searchTerm, 1000);
 
@@ -50,7 +51,6 @@ const UsersPage = () => {
   const onSearch = (value) => {
     setSearchTerm(value);
   };
-
   const handleFilterChange = (value, key) => {
     setFilters((prevFilters) => {
       const newFilters = { ...prevFilters };
@@ -66,7 +66,6 @@ const UsersPage = () => {
       _page: 1, // Reset current page when filters change
     }));
   };
-
   const handleTableChange = (pagination) => {
     setPagination((prevPagination) => ({
       ...prevPagination,
@@ -74,7 +73,15 @@ const UsersPage = () => {
       _limit: pagination.pageSize,
     }));
   };
+  const handleModalDelete = () => {
+    setDeleteModalVisible((prevState) => !prevState);
+  };
+  const handleDelete = (user) => {
+    dispatch(setCurrentUser(user));
+    handleModalDelete();
+  };
 
+  // Columns Table
   const columns = [
     {
       title: "Usuario",
@@ -115,11 +122,7 @@ const UsersPage = () => {
       width: 200,
       render: (_, record) => (
         <Space size="middle">
-          <Button
-            type="link"
-            onClick={() => console.log("Eliminar")}
-            size="small"
-          >
+          <Button type="link" onClick={() => handleDelete(record)} size="small">
             Eliminar
           </Button>
           <Button
@@ -136,6 +139,7 @@ const UsersPage = () => {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters, pagination]);
 
   useEffect(() => {
@@ -199,6 +203,11 @@ const UsersPage = () => {
             }}
             onChange={handleTableChange}
           />
+          {/* <UsersDeleteForm
+            visible={deleteModalVisible}
+            callback={fetchData}
+            onCancel={handleModalDelete}
+          /> */}
         </Show.Else>
       </Show>
     </>

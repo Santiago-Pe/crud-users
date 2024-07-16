@@ -4,29 +4,30 @@ import { useDispatch, useSelector } from "react-redux";
 
 import ApiContext from "../../../context/apiContext";
 import { createUser, updateUser } from "../../../services/users/usersServices";
+import { setCurrentUser } from "../../../reudx/actions/users/userActions";
 
 const UserModalForm = ({ useButton = true, callback }) => {
   const currentUser = useSelector((state) => state.users.currentUser);
   const dispatch = useDispatch();
   const { client: apiClient } = useContext(ApiContext);
-  const [visible, setVisible] = useState(false);
-  const [confirmLoading, setConfirmLoading] = useState(false);
   const [form] = Form.useForm();
 
+  const [visible, setVisible] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+
+  // Functions
   const handleModal = () => {
-    setVisible(!visible);
+    setVisible((prevState) => !prevState);
 
     if (currentUser) {
       dispatch(setCurrentUser(null));
     }
     form.resetFields();
   };
-
   const handleOk = () => {
     form
       .validateFields()
       .then(async (values) => {
-        console.log("Body enviado:", values); // Mostrar el body que se envía al servidor
         setConfirmLoading(true);
 
         try {
@@ -39,7 +40,6 @@ const UserModalForm = ({ useButton = true, callback }) => {
           message.success(
             currentUser ? "Usuario actualizado" : "Usuario creado"
           );
-          form.resetFields();
           callback?.();
         } catch (error) {
           console.error("Error al procesar la operación:", error);
@@ -58,6 +58,7 @@ const UserModalForm = ({ useButton = true, callback }) => {
       setVisible(true);
       form.setFieldsValue(currentUser);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 
   return (

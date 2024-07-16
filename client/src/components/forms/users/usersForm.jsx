@@ -14,7 +14,7 @@ const UsersForm = ({ initialValues, onFinish }) => {
       form={form}
       initialValues={initialValues}
       onFinish={handleFinish}
-      layout="vertical" // Establece el diseño vertical del formulario
+      layout="vertical"
     >
       <Row gutter={16}>
         <Col xs={24} lg={12}>
