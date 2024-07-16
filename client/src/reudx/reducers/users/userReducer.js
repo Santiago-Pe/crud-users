@@ -1,11 +1,12 @@
 // src/redux/reducers/users/userReducer.js
+
 import {
   FETCH_USERS_SUCCESS,
   SET_CURRENT_USER,
-  SET_LOADING,
   SET_ERROR,
+  SET_LOADING,
   SET_TOTAL_RECORD,
-} from "../../actions/users/userActionTypes";
+} from "../../../types/actions";
 
 const initialState = {
   users: [],

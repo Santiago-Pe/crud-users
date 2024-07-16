@@ -3,7 +3,7 @@ import { useEffect, useState, useContext } from "react";
 import { Button, Select, Space, Table, Tag, Input } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import ApiContext from "../../context/apiContext";
-import { UserModalForm, Loader, Show } from "../../components";
+import { UserModalForm, Loader, Show, UsersDeleteForm } from "../../components";
 import PageFaildFetch from "../errors/pageFaildFetch";
 
 import { useDebounce } from "../../hooks";
@@ -16,6 +16,8 @@ import {
   setUsers,
 } from "../../reudx/actions/users/userActions";
 import { fetchUsers } from "../../services/users/usersServices";
+import { openModal } from "../../reudx/actions/modals/modalsActions";
+import { DELETE_USER_FORM, USER_FORM } from "../../types/modals/modalTypes";
 
 const { Search } = Input;
 
@@ -24,7 +26,6 @@ const UsersPage = () => {
   const { client: apiClient } = useContext(ApiContext);
   const [filters, setFilters] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [pagination, setPagination] = useState({ _page: 1, _limit: 10 });
   const debouncedSearchTerm = useDebounce(searchTerm, 1000);
 
@@ -38,7 +39,6 @@ const UsersPage = () => {
         ...filters,
         ...pagination,
       });
-      console.log(response.data);
       dispatch(setUsers(response.data));
       dispatch(setTotalRecords(response.totalUsers));
     } catch (error) {
@@ -73,12 +73,13 @@ const UsersPage = () => {
       _limit: pagination.pageSize,
     }));
   };
-  const handleModalDelete = () => {
-    setDeleteModalVisible((prevState) => !prevState);
-  };
-  const handleDelete = (user) => {
+  const openUserModal = (user) => {
+    dispatch(openModal(USER_FORM));
     dispatch(setCurrentUser(user));
-    handleModalDelete();
+  };
+  const openDeleteUserModal = (user) => {
+    dispatch(openModal(DELETE_USER_FORM));
+    dispatch(setCurrentUser(user));
   };
 
   // Columns Table
@@ -122,12 +123,16 @@ const UsersPage = () => {
       width: 200,
       render: (_, record) => (
         <Space size="middle">
-          <Button type="link" onClick={() => handleDelete(record)} size="small">
+          <Button
+            type="link"
+            onClick={() => openDeleteUserModal(record)}
+            size="small"
+          >
             Eliminar
           </Button>
           <Button
             type="link"
-            onClick={() => dispatch(setCurrentUser(record))}
+            onClick={() => openUserModal(record)}
             size="small"
           >
             Editar
@@ -203,11 +208,7 @@ const UsersPage = () => {
             }}
             onChange={handleTableChange}
           />
-          {/* <UsersDeleteForm
-            visible={deleteModalVisible}
-            callback={fetchData}
-            onCancel={handleModalDelete}
-          /> */}
+          <UsersDeleteForm callback={fetchData} />
         </Show.Else>
       </Show>
     </>

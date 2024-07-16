@@ -4,8 +4,7 @@ const UsersForm = ({ initialValues, onFinish }) => {
   const [form] = Form.useForm();
 
   // Función para manejar el envío del formulario
-  const handleFinish = (values) => {
-    console.log("Formulario enviado:", values);
+  const handleFinish = () => {
     onFinish?.(); // Llama a la función onFinish pasada como prop
   };
 

@@ -1,11 +1,12 @@
 // src/redux/actions/users/userActions.js
+
 import {
   FETCH_USERS_SUCCESS,
   SET_CURRENT_USER,
-  SET_LOADING,
   SET_ERROR,
+  SET_LOADING,
   SET_TOTAL_RECORD,
-} from "./userActionTypes";
+} from "../../../types/actions";
 
 export const setUsers = (users) => ({
   type: FETCH_USERS_SUCCESS,
