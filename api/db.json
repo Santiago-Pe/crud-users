@@ -449,6 +449,15 @@
       "email": "grace.allen@example.com",
       "status": "active",
       "age": 32
+    },
+    {
+      "username": "tulete",
+      "name": "Santiago",
+      "lastname": "Peña",
+      "status": "active",
+      "email": "santi.raul97@gmail.com",
+      "age": "27",
+      "id": 51
     }
   ]
 }
