@@ -1,5 +1,3 @@
-// src/redux/reducers/users/userReducer.js
-
 import {
   FETCH_USERS_SUCCESS,
   SET_CURRENT_USER,

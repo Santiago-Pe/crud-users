@@ -1,5 +1,3 @@
-// src/redux/actions/users/userActions.js
-
 import {
   FETCH_USERS_SUCCESS,
   SET_CURRENT_USER,

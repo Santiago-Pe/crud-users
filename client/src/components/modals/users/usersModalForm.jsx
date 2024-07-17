@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
-import { Button, Modal, Form, Input, Row, Col, Select, message } from "antd";
 import { useDispatch, useSelector } from "react-redux";
+
+import { Button, Modal, Form, Input, Row, Col, Select, message } from "antd";
 
 import ApiContext from "../../../context/apiContext";
 import { createUser, updateUser } from "../../../services/users/usersServices";
@@ -13,12 +14,14 @@ import { USER_FORM } from "../../../types/modals/modalTypes";
 
 const UserModalForm = ({ useButton = true, callback }) => {
   const currentUser = useSelector((state) => state.users.currentUser);
-  const { currentModal, modalVisible } = useSelector((state) => state.modals);
   const dispatch = useDispatch();
+  const { currentModal, modalVisible } = useSelector((state) => state.modals);
   const { client: apiClient } = useContext(ApiContext);
+
   const [form] = Form.useForm();
   const [confirmLoading, setConfirmLoading] = useState(false);
 
+  // Functions
   const close = () => {
     dispatch(setCurrentUser(null));
     dispatch(closeModal());

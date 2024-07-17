@@ -1,10 +1,12 @@
+import "./index.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App.jsx";
-import "./index.css";
+
 import { BrowserRouter } from "react-router-dom";
 import { ConfigProvider } from "antd";
 import { Provider } from "react-redux";
+
+import App from "./App.jsx";
 import store from "./reudx/store/sotre.js";
 import ApiProvider from "./context/apiProvaider.jsx";
 
@@ -19,7 +21,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
             },
             components: {
               Modal: {
-                wireframe: true, // here
+                wireframe: true,
               },
             },
           }}

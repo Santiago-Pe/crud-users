@@ -1,13 +1,13 @@
-// UsersPage.js
 import { useEffect, useState, useContext } from "react";
-import { Button, Select, Space, Table, Tag, Input } from "antd";
 import { useDispatch, useSelector } from "react-redux";
+
+import { Button, Select, Space, Table, Tag, Input } from "antd";
+import { CloseOutlined } from "@ant-design/icons";
+
 import ApiContext from "../../context/apiContext";
 import { UserModalForm, Loader, Show, UsersDeleteForm } from "../../components";
 import PageFaildFetch from "../errors/pageFaildFetch";
-
 import { useDebounce } from "../../hooks";
-import { CloseOutlined } from "@ant-design/icons";
 import {
   setCurrentUser,
   setError,
@@ -24,12 +24,13 @@ const { Search } = Input;
 const UsersPage = () => {
   const dispatch = useDispatch();
   const { client: apiClient } = useContext(ApiContext);
+  const { users, loading, error, total } = useSelector((state) => state.users);
+
   const [filters, setFilters] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
   const [pagination, setPagination] = useState({ _page: 1, _limit: 10 });
-  const debouncedSearchTerm = useDebounce(searchTerm, 1000);
 
-  const { users, loading, error, total } = useSelector((state) => state.users);
+  const debouncedSearchTerm = useDebounce(searchTerm, 1000);
 
   // Fetch
   const fetchData = async () => {
@@ -47,6 +48,7 @@ const UsersPage = () => {
       dispatch(setLoading(false));
     }
   };
+
   // Functions
   const onSearch = (value) => {
     setSearchTerm(value);

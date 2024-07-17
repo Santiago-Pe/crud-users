@@ -1,7 +1,5 @@
-/* eslint-disable react/prop-types */
 import React from "react";
 
-// eslint-disable-next-line react/prop-types
 const Show = ({ children }) => {
   let when = null;
   let otherwise = null;

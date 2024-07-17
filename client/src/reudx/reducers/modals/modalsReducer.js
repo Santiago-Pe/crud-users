@@ -1,6 +1,5 @@
 import { CLOSE_MODAL, OPEN_MODAL } from "../../../types/actions";
 
-// src/reducers/modalsReducer.js
 const initialState = {
   modalVisible: false,
   currentModal: null,

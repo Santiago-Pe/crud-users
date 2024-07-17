@@ -1,4 +1,3 @@
-// src/api/apiService.js
 export const fetchUsers = async (client, filters = {}) => {
   await new Promise((resolve) => setTimeout(resolve, 2000));
   const queryParams = new URLSearchParams(filters).toString();
