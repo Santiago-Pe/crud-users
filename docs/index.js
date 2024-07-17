@@ -4,7 +4,7 @@
 */
 
 function reverseString(str) {
-  // Tu solución acá  
+  return str.split("").reverse().join("");
 }
 
 /*
@@ -13,7 +13,8 @@ function reverseString(str) {
   y devuelva true si la cadena es un palíndromo, y false en caso contrario.
 */
 function isPalindrome(str) {
-  // Tu solución acá
+  const reversedStr = str.split("").reverse().join("");
+  return str === reversedStr;
 }
 
 /*
@@ -30,9 +31,20 @@ function isPalindrome(str) {
 */
 
 function closestPair(arr) {
-  // Tu solución acá
-}
+  arr.sort((a, b) => a - b);
+  let minDiff = Infinity;
+  let pair = [];
 
+  for (let i = 0; i < arr.length - 1; i++) {
+    const diff = arr[i + 1] - arr[i];
+    if (diff < minDiff) {
+      minDiff = diff;
+      pair = [arr[i], arr[i + 1]];
+    }
+  }
+
+  return pair;
+}
 
 /*
   Ejercicio 4: Calculadora - Programación Orientada a Objetos
@@ -67,12 +79,56 @@ function closestPair(arr) {
 */
 
 class Calculator {
-  // Tu solución acá
+  constructor() {
+    this.lastResult = null;
+  }
+
+  add(a, b) {
+    this.lastResult = a + b;
+    return this.lastResult;
+  }
+
+  subtract(a, b) {
+    this.lastResult = a - b;
+    return this.lastResult;
+  }
+
+  multiply(a, b) {
+    this.lastResult = a * b;
+    return this.lastResult;
+  }
+
+  divide(a, b) {
+    if (b === 0) {
+      throw new Error("Division by zero is not allowed");
+    }
+    this.lastResult = a / b;
+    return this.lastResult;
+  }
+
+  getLastResult() {
+    return this.lastResult;
+  }
 }
+
+Calculator.prototype.exponentiate = function (base, exponent) {
+  if (exponent < 0) {
+    throw new Error("Exponentiation with negative exponent is not allowed");
+  }
+  this.lastResult = Math.pow(base, exponent);
+  return this.lastResult;
+};
 
 module.exports = {
   closestPair,
   isPalindrome,
   reverseString,
   Calculator,
-}
+};
+
+module.exports = {
+  closestPair,
+  isPalindrome,
+  reverseString,
+  Calculator,
+};
