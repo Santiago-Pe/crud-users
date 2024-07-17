@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { Button, Modal, Form, Input, Row, Col, Select, message } from "antd";
+import { v4 as uuidv4 } from "uuid";
 
 import ApiContext from "../../../context/apiContext";
 import { createUser, updateUser } from "../../../services/users/usersServices";
@@ -39,7 +40,9 @@ const UserModalForm = ({ useButton = true, callback }) => {
           if (currentUser) {
             await updateUser(apiClient, currentUser.id, values);
           } else {
-            await createUser(apiClient, values);
+            const newUser = { id: uuidv4(), ...values };
+            console.log(newUser);
+            await createUser(apiClient, newUser);
           }
           close();
           message.success(
