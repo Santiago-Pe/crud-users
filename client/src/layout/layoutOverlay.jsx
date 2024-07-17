@@ -1,15 +1,21 @@
-import { Breadcrumb, Flex, Layout } from "antd";
 import { Outlet } from "react-router-dom";
 
+import { Flex, Layout } from "antd";
+import { Breadcrumbs } from "../components";
+
 const { Header, Content } = Layout;
+
 const LayoutOverlay = () => {
+  // Layout styles
   const layoutStyle = {
     backgroundColor: "#f5f5f5",
   };
   const contentStyle = {
     minHeight: "100%",
-
     padding: "20px",
+    width: "100%",
+    maxWidth: "1400px",
+    margin: "0 auto",
   };
   const headerStyle = {
     position: "sticky",
@@ -21,21 +27,16 @@ const LayoutOverlay = () => {
     backgroundColor: "#D9D9D9",
     height: "91px",
   };
-  const breadcrumbStyle = {
-    margin: "16px 0",
-  };
+
   return (
     <Flex gap="middle" wrap>
       <Layout style={layoutStyle}>
         <Header style={headerStyle}>
-          <img src="/public/assets/logo.png" alt="logo-flexus" />
+          <img src="/assets/logo.png" alt="logo-flexus" />
         </Header>
 
         <Content style={contentStyle}>
-          <Breadcrumb
-            style={breadcrumbStyle}
-            items={[{ title: "Usuarios" }, { title: "Listado de usuarios" }]}
-          />
+          <Breadcrumbs />
           <Outlet />
         </Content>
       </Layout>

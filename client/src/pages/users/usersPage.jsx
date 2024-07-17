@@ -1,120 +1,142 @@
-import { Button, Select, Space, Table, Tag } from "antd";
-import { Input } from "antd";
-import { UsersForm } from "../../components";
-import { useState } from "react";
+import styles from "./userPage.module.css";
+
+import { useEffect, useState, useContext } from "react";
+import { useDispatch, useSelector } from "react-redux";
+
+import { Button, Select, Space, Table, Tag, Input } from "antd";
+import { CloseOutlined } from "@ant-design/icons";
+
+import ApiContext from "../../context/apiContext";
+import { UserModalForm, Loader, Show, UsersDeleteForm } from "../../components";
+import PageFaildFetch from "../errors/pageFaildFetch";
+import { useDebounce } from "../../hooks";
+import {
+  setCurrentUser,
+  setError,
+  setLoading,
+  setTotalRecords,
+  setUsers,
+} from "../../reudx/actions/users/userActions";
+import { fetchUsers } from "../../services/users/usersServices";
+import { openModal } from "../../reudx/actions/modals/modalsActions";
+import { DELETE_USER_FORM, USER_FORM } from "../../types/modals/modalTypes";
 
 const { Search } = Input;
-const dataSource = [
-  {
-    key: "1",
-    name: "Mike",
-    lastname: "Bubble",
-    status: false,
-    user: "mike_bubble",
-  },
-  {
-    key: "2",
-    name: "John",
-    lastname: "Valverde",
-    status: false,
-    user: "john_valverde",
-  },
-  {
-    key: "3",
-    name: "Jane",
-    lastname: "Smith",
-    status: true,
-    user: "jane_smith",
-  },
-  { key: "4", name: "Doe", lastname: "Doe", status: true, user: "doe_doe" },
-  {
-    key: "5",
-    name: "Anna",
-    lastname: "Taylor",
-    status: false,
-    user: "anna_taylor",
-  },
-  {
-    key: "6",
-    name: "Tom",
-    lastname: "Johnson",
-    status: true,
-    user: "tom_johnson",
-  },
-  { key: "7", name: "Lucy", lastname: "Lee", status: false, user: "lucy_lee" },
-  {
-    key: "8",
-    name: "Mark",
-    lastname: "Brown",
-    status: true,
-    user: "mark_brown",
-  },
-  {
-    key: "9",
-    name: "Emma",
-    lastname: "White",
-    status: false,
-    user: "emma_white",
-  },
-  {
-    key: "10",
-    name: "James",
-    lastname: "Garcia",
-    status: true,
-    user: "james_garcia",
-  },
-];
 
 const UsersPage = () => {
-  const [currentUser, setCurrentUser] = useState(null);
-  const onSearch = (value, _e, info) => console.log(info?.source, value);
+  const dispatch = useDispatch();
+  const { client: apiClient } = useContext(ApiContext);
+  const { users, loading, error, total } = useSelector((state) => state.users);
+
+  const [filters, setFilters] = useState({});
+  const [searchTerm, setSearchTerm] = useState("");
+  const [pagination, setPagination] = useState({ _page: 1, _limit: 10 });
+
+  const debouncedSearchTerm = useDebounce(searchTerm, 1000);
+
+  // Fetch
+  const fetchData = async () => {
+    try {
+      dispatch(setLoading(true));
+      const response = await fetchUsers(apiClient, {
+        ...filters,
+        ...pagination,
+      });
+      dispatch(setUsers(response.data));
+      dispatch(setTotalRecords(response.totalUsers));
+    } catch (error) {
+      dispatch(setError(error.message));
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+  // Functions
+  const onSearch = (value) => {
+    setSearchTerm(value);
+  };
+  const handleFilterChange = (value, key) => {
+    setFilters((prevFilters) => {
+      const newFilters = { ...prevFilters };
+      if (value === undefined) {
+        delete newFilters[key];
+      } else {
+        newFilters[key] = value;
+      }
+      return newFilters;
+    });
+    setPagination((prevPagination) => ({
+      ...prevPagination,
+      _page: 1, // Reset current page when filters change
+    }));
+  };
+  const handleTableChange = (pagination) => {
+    setPagination((prevPagination) => ({
+      ...prevPagination,
+      _page: pagination.current,
+      _limit: pagination.pageSize,
+    }));
+  };
+  const openUserModal = (user) => {
+    dispatch(openModal(USER_FORM));
+    dispatch(setCurrentUser(user));
+  };
+  const openDeleteUserModal = (user) => {
+    dispatch(openModal(DELETE_USER_FORM));
+    dispatch(setCurrentUser(user));
+  };
+
+  // Columns Table
   const columns = [
     {
       title: "Usuario",
-      dataIndex: "user",
-      key: "user",
+      dataIndex: "username",
+      key: "username",
       width: "33.33%",
+      render: (username) => <span>{username}</span>,
     },
     {
       title: "Nombre",
       dataIndex: "name",
       key: "name",
       width: "33.33%",
+      render: (name) => <span>{name}</span>,
     },
     {
       title: "Apellido",
       dataIndex: "lastname",
       key: "lastname",
       width: "33.33%",
+      render: (lastname) => <span>{lastname}</span>,
     },
     {
-      width: 100,
       title: "Estado",
       dataIndex: "status",
       key: "status",
+      width: 100,
       render: (status) => (
-        <Tag color={status ? "green" : "red"}>
-          {status ? "Activo" : "Inactivo"}
+        <Tag color={status === "active" ? "green" : "red"}>
+          {status === "active" ? "Activo" : "Inactivo"}
         </Tag>
       ),
     },
     {
-      width: 200,
       title: "Acciones",
-      dataIndex: "accions",
-      key: "accions",
-      render: (text, record) => (
+      dataIndex: "actions",
+      key: "actions",
+      width: 200,
+      render: (_, record) => (
         <Space size="middle">
           <Button
             type="link"
-            onClick={() => console.log("Eliminar")}
+            onClick={() => openDeleteUserModal(record)}
             size="small"
           >
             Eliminar
           </Button>
           <Button
             type="link"
-            onClick={() => setCurrentUser(record)}
+            onClick={() => openUserModal(record)}
             size="small"
           >
             Editar
@@ -124,20 +146,42 @@ const UsersPage = () => {
     },
   ];
 
+  useEffect(() => {
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters, pagination]);
+
+  useEffect(() => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      q: debouncedSearchTerm,
+    }));
+    setPagination((prevPagination) => ({
+      ...prevPagination,
+      _page: 1, // Reset current page when filters change
+    }));
+  }, [debouncedSearchTerm]);
+
   return (
-    <>
-      <div className="pageHeader">
-        <div className="filterHeader">
+    <section className={styles.usersPage__container}>
+      <div className={styles.usersPage__header}>
+        <div className={styles.usersPage__filters}>
           <Search
             size="large"
             placeholder="input search text"
             onSearch={onSearch}
+            onChange={(e) => setSearchTerm(e.target.value)}
             style={{
               width: 300,
             }}
           />
           <Select
-            options={[{ value: "sample", label: <span>sample</span> }]}
+            allowClear={{ clearIcon: <CloseOutlined /> }}
+            onChange={(value) => handleFilterChange(value, "status")}
+            options={[
+              { value: "active", label: "Activo" },
+              { value: "inactive", label: "Inactivo" },
+            ]}
             placeholder="Filtrar por estado"
             size="large"
             style={{
@@ -146,12 +190,35 @@ const UsersPage = () => {
           />
         </div>
         <div>
-          <UsersForm user={currentUser} reset={() => setCurrentUser(null)} />
+          <UserModalForm useButton callback={fetchData} />
         </div>
       </div>
+      <Show>
+        <Show.When isTrue={loading}>
+          <Loader />
+        </Show.When>
+        <Show.When isTrue={error}>
+          <PageFaildFetch />
+        </Show.When>
+        <Show.Else>
+          <Table
+            dataSource={users}
+            columns={columns}
+            rowKey="id"
+            pagination={{
+              current: pagination._page,
+              pageSize: pagination._limit,
+              total: total,
+              showSizeChanger: false,
+            }}
+            onChange={handleTableChange}
+            className={styles.usersPage__boxShadow}
+          />
 
-      <Table dataSource={dataSource} columns={columns} rowHoverable={false} />
-    </>
+          <UsersDeleteForm callback={fetchData} />
+        </Show.Else>
+      </Show>
+    </section>
   );
 };
 
