@@ -1,3 +1,5 @@
+import styles from "./userPage.module.css";
+
 import { useEffect, useState, useContext } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -161,9 +163,9 @@ const UsersPage = () => {
   }, [debouncedSearchTerm]);
 
   return (
-    <>
-      <div className="pageHeader">
-        <div className="filterHeader">
+    <section className={styles.usersPage__container}>
+      <div className={styles.usersPage__header}>
+        <div className={styles.usersPage__filters}>
           <Search
             size="large"
             placeholder="input search text"
@@ -207,13 +209,16 @@ const UsersPage = () => {
               current: pagination._page,
               pageSize: pagination._limit,
               total: total,
+              showSizeChanger: false,
             }}
             onChange={handleTableChange}
+            className={styles.usersPage__boxShadow}
           />
+
           <UsersDeleteForm callback={fetchData} />
         </Show.Else>
       </Show>
-    </>
+    </section>
   );
 };
 

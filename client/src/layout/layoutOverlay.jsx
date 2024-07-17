@@ -12,8 +12,10 @@ const LayoutOverlay = () => {
   };
   const contentStyle = {
     minHeight: "100%",
-
     padding: "20px",
+    width: "100%",
+    maxWidth: "1400px",
+    margin: "0 auto",
   };
   const headerStyle = {
     position: "sticky",
