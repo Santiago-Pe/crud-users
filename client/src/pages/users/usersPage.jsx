@@ -1,7 +1,4 @@
-import styles from "./userPage.module.css";
-
-import { useEffect, useState, useContext } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useCallback, useContext } from "react";
 
 import { Button, Select, Space, Table, Tag, Input } from "antd";
 import { CloseOutlined } from "@ant-design/icons";
@@ -9,84 +6,84 @@ import { CloseOutlined } from "@ant-design/icons";
 import ApiContext from "../../context/apiContext";
 import { UserModalForm, Loader, Show, UsersDeleteForm } from "../../components";
 import PageFaildFetch from "../errors/pageFaildFetch";
-import { useDebounce } from "../../hooks";
-import {
-  setCurrentUser,
-  setError,
-  setLoading,
-  setTotalRecords,
-  setUsers,
-} from "../../reudx/actions/users/userActions";
-import { fetchUsers } from "../../services/users/usersServices";
+import { useFetchUsers } from "../../hooks";
+import { setCurrentUser } from "../../reudx/actions/users/userActions";
 import { openModal } from "../../reudx/actions/modals/modalsActions";
 import { DELETE_USER_FORM, USER_FORM } from "../../types/modals/modalTypes";
+
+import styles from "./userPage.module.css";
+import { useDispatch } from "react-redux";
 
 const { Search } = Input;
 
 const UsersPage = () => {
-  const dispatch = useDispatch();
   const { client: apiClient } = useContext(ApiContext);
-  const { users, loading, error, total } = useSelector((state) => state.users);
+  const dispatch = useDispatch();
+  const {
+    users,
+    loading,
+    error,
+    total,
+    pagination,
+    setFilters,
+    setSearchTerm,
+    setPagination,
+    fetchData,
+  } = useFetchUsers(apiClient);
 
-  const [filters, setFilters] = useState({});
-  const [searchTerm, setSearchTerm] = useState("");
-  const [pagination, setPagination] = useState({ _page: 1, _limit: 10 });
+  const onSearch = useCallback(
+    (value) => {
+      setSearchTerm(value);
+    },
+    [setSearchTerm]
+  );
 
-  const debouncedSearchTerm = useDebounce(searchTerm, 1000);
-
-  // Fetch
-  const fetchData = async () => {
-    try {
-      dispatch(setLoading(true));
-      const response = await fetchUsers(apiClient, {
-        ...filters,
-        ...pagination,
+  const handleFilterChange = useCallback(
+    (value, key) => {
+      setFilters((prevFilters) => {
+        const newFilters = { ...prevFilters };
+        if (value === undefined) {
+          delete newFilters[key];
+        } else {
+          newFilters[key] = value;
+        }
+        return newFilters;
       });
-      dispatch(setUsers(response.data));
-      dispatch(setTotalRecords(response.totalUsers));
-    } catch (error) {
-      dispatch(setError(error.message));
-    } finally {
-      dispatch(setLoading(false));
-    }
-  };
+      setPagination((prevPagination) => ({
+        ...prevPagination,
+        _page: 1, // Reset current page when filters change
+      }));
+    },
+    [setFilters, setPagination]
+  );
 
-  // Functions
-  const onSearch = (value) => {
-    setSearchTerm(value);
-  };
-  const handleFilterChange = (value, key) => {
-    setFilters((prevFilters) => {
-      const newFilters = { ...prevFilters };
-      if (value === undefined) {
-        delete newFilters[key];
-      } else {
-        newFilters[key] = value;
-      }
-      return newFilters;
-    });
-    setPagination((prevPagination) => ({
-      ...prevPagination,
-      _page: 1, // Reset current page when filters change
-    }));
-  };
-  const handleTableChange = (pagination) => {
-    setPagination((prevPagination) => ({
-      ...prevPagination,
-      _page: pagination.current,
-      _limit: pagination.pageSize,
-    }));
-  };
-  const openUserModal = (user) => {
-    dispatch(openModal(USER_FORM));
-    dispatch(setCurrentUser(user));
-  };
-  const openDeleteUserModal = (user) => {
-    dispatch(openModal(DELETE_USER_FORM));
-    dispatch(setCurrentUser(user));
-  };
+  const handleTableChange = useCallback(
+    (pagination) => {
+      setPagination((prevPagination) => ({
+        ...prevPagination,
+        _page: pagination.current,
+        _limit: pagination.pageSize,
+      }));
+    },
+    [setPagination]
+  );
 
-  // Columns Table
+  const openUserModal = useCallback(
+    (user) => {
+      dispatch(openModal(USER_FORM));
+      dispatch(setCurrentUser(user));
+    },
+    [dispatch]
+  );
+
+  const openDeleteUserModal = useCallback(
+    (user) => {
+      dispatch(openModal(DELETE_USER_FORM));
+      dispatch(setCurrentUser(user));
+    },
+    [dispatch]
+  );
+
   const columns = [
     {
       title: "Usuario",
@@ -145,23 +142,6 @@ const UsersPage = () => {
       ),
     },
   ];
-
-  useEffect(() => {
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters, pagination]);
-
-  useEffect(() => {
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      q: debouncedSearchTerm,
-    }));
-    setPagination((prevPagination) => ({
-      ...prevPagination,
-      _page: 1, // Reset current page when filters change
-    }));
-  }, [debouncedSearchTerm]);
-
   return (
     <section className={styles.usersPage__container}>
       <div className={styles.usersPage__header}>
