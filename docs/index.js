@@ -31,11 +31,13 @@ function isPalindrome(str) {
 */
 
 function closestPair(arr) {
-  arr.sort((a, b) => a - b);
-  let minDiff = Infinity;
-  let pair = [];
+  if (arr.length < 2) return [];
 
-  for (let i = 0; i < arr.length - 1; i++) {
+  arr.sort((a, b) => a - b);
+  let pair = [arr[0], arr[1]];
+  let minDiff = arr[1] - arr[0];
+
+  for (let i = 1; i < arr.length - 1; i++) {
     const diff = arr[i + 1] - arr[i];
     if (diff < minDiff) {
       minDiff = diff;
@@ -117,13 +119,6 @@ Calculator.prototype.exponentiate = function (base, exponent) {
   }
   this.lastResult = Math.pow(base, exponent);
   return this.lastResult;
-};
-
-module.exports = {
-  closestPair,
-  isPalindrome,
-  reverseString,
-  Calculator,
 };
 
 module.exports = {
