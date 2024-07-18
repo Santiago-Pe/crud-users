@@ -6,7 +6,7 @@ import { Breadcrumb } from "antd";
 // Text
 const breadcrumbsTex = {
   home: "Usuarios",
-  lista_usuarios: "Lista de usuarios",
+  listausuarios: "Lista de usuarios",
 };
 
 const Breadcrumbs = () => {
@@ -29,7 +29,7 @@ const Breadcrumbs = () => {
 
     pathParts.forEach((part, index) => {
       const fullPath = `/${pathParts.slice(0, index + 1).join("/")}`;
-      const nameKey = part;
+      const nameKey = part.replace(/-/g, "");
 
       const breadcrumb = {
         title: breadcrumbsTex[nameKey] || part,
